@@ -1,0 +1,28 @@
+{
+  "name": "qax-real-exp-apis-pw",
+  "version": "1.0.0",
+  "description": "Repositorio de automatización de APIs con Playwright para QAX Real Experience.",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report"
+  },
+  "keywords": [
+    "playwright",
+    "api-testing",
+    "test-automation",
+    "qa-automation",
+    "qax-real-experience",
+    "qaxpert"
+  ],
+  "author": "QAXpert",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.53.0",
+    "@types/node": "^24.0.0",
+    "dotenv": "^16.5.0",
+    "typescript": "^5.8.3"
+  }
+}
