@@ -7,6 +7,7 @@ Este espacio está destinado a que los aprendices apliquen en un contexto real l
 ## Objetivo
 Implementar pruebas automatizadas de APIs siguiendo el flujo de trabajo definido por QAX Real Experience, incluyendo buenas prácticas de automatización, versionamiento, revisión en pares y entregas mediante Pull Request.
 
+
 ## Alcance
 En este repositorio se desarrollan automatizaciones orientadas al nivel **APIs**, usando Playwright como framework principal.
 
