@@ -5,9 +5,8 @@
  * comunes (apikey, Content-Type) y delegando el logging a `Logger`.
  */
 import type { APIRequestContext } from "@playwright/test";
-import { Logger } from "../../shared/helpers/logger.js";
-import { env } from "../../config/env.js";
-import type { ApiResponse } from "../../types/api.js";
+import { Logger } from "../../helpers/logger.js";
+import type { ApiResponse } from "../types/api.js";
 
 export class ApiHelper {
   constructor(private request: APIRequestContext) {}
@@ -27,7 +26,7 @@ export class ApiHelper {
         data,
         headers: {
           "Content-Type": "application/json",
-          apikey: env.supabaseAnonKey,
+          apikey: process.env.SUPABASE_ANON_KEY ?? "",
           ...headers,
         },
       });
@@ -49,7 +48,7 @@ export class ApiHelper {
       const response = await this.request.get(url, {
         headers: {
           "Content-Type": "application/json",
-          apikey: env.supabaseAnonKey,
+          apikey: process.env.SUPABASE_ANON_KEY ?? "",
           ...headers,
         },
       });

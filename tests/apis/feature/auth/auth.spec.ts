@@ -2,20 +2,20 @@
  * Suite migrada: flujo principal de Supabase Auth (APIs).
  *
  * Cubre: signup → login → getUser con token válido.
+ *
+ * @tag @smoke
  */
 import { expect, test } from "@playwright/test";
-import type { AuthRequest } from "../../src/types/auth.js";
-import type { AuthResponse, SignupResponse } from "../../src/types/auth.js";
-import { AuthService } from "../../src/apis/services/AuthService.js";
-import { generateEmail } from "../../src/shared/utils/dataGenerator.js";
-import { env } from "../../src/config/env.js";
+import type { AuthRequest, AuthResponse, SignupResponse } from "../../../../src/apis/types/auth.js";
+import { AuthService } from "../../../../src/apis/services/AuthService.js";
+import { generateEmail } from "../../../../src/utils/dataGenerator.js";
 
 test.describe("Supabase Auth API @smoke", () => {
   test("debe registrar, autenticar y consultar usuario autorizado", async ({ request }) => {
     const authService = new AuthService(request);
     const authRequest: AuthRequest = {
       email: generateEmail(),
-      password: env.testUserPassword,
+      password: process.env.TEST_USER_PASSWORD ?? "",
     };
 
     // Crea un usuario nuevo con email dinámico.

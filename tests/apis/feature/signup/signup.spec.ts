@@ -2,14 +2,14 @@
  * Suite migrada: endpoint de registro (/auth/v1/signup).
  */
 import { test, expect } from "@playwright/test";
-import { SignupService } from "../../src/apis/services/SignupService.js";
+import { SignupService } from "../../../../src/apis/services/SignupService.js";
 import {
   buildValidUser,
   buildUserWithoutPassword,
-} from "../../src/data/builders/userBuilder.js";
-import { Logger } from "../../src/shared/helpers/logger.js";
-import { SignupResponseModel } from "../../src/apis/models/signupResponse.js";
-import { ErrorSignupResponse } from "../../src/apis/models/errorSignupResponse.js";
+} from "../../../../src/apis/helpers/userBuilder.js";
+import { Logger } from "../../../../src/helpers/logger.js";
+import { SignupResponseModel } from "../../../../src/apis/models/signupResponse.js";
+import { ErrorSignupResponse } from "../../../../src/apis/models/errorSignupResponse.js";
 
 test.describe(
   "HU - Automatización del Endpoint de Registro (/auth/v1/signup)",

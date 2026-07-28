@@ -5,7 +5,7 @@
  * boilerplate en los Page Objects y centralizar esperas/interacciones.
  */
 import type { Page, Locator } from "@playwright/test";
-import { Logger } from "../../shared/helpers/logger.js";
+import { Logger } from "../../helpers/logger.js";
 
 export class UiHelper {
   constructor(private page: Page) {}

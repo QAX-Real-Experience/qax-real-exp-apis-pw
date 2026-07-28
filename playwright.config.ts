@@ -1,18 +1,15 @@
 import { defineConfig, devices } from "@playwright/test";
-import dotenv from "dotenv";
 
-// Carga variables desde .env local antes de evaluar cualquier project.
-// La validación tipada (fail-fast) la hace src/config/env.ts, que se
-// importa estáticamente desde los módulos de tests en runtime.
-dotenv.config();
+// Carga directa de variables desde .env local.
+// No hay wrapper tipado: cada módulo lee `process.env` donde lo necesita.
+require("dotenv").config();
 
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? "";
 const BASE_URL_API = process.env.BASE_URL_API ?? "http://localhost";
 const BASE_URL_WEB = process.env.BASE_URL_WEB ?? "http://localhost:5173";
 
 export default defineConfig({
-  testDir: "./tests",
-  // Suite separada en subdirectorios; cada project selecciona el suyo.
+  // Cada project define su propio testDir; el general sólo fija defaults.
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
@@ -31,11 +28,16 @@ export default defineConfig({
     video: "retain-on-failure",
   },
 
-  // Projects: APIs, Web y E2E. Podés correrlos con --project=<name>.
+  // Projects por tecnología. No hay project `e2e` separado: cada
+  // tecnología (apis, web) aloja sus flujos e2e dentro de su propia
+  // carpeta (tests/<tech>/e2e/{smoke,regression}). Para correrlos se
+  // filtra con --grep por tag (@smoke | @regression) o apuntando al
+  // subdirectorio. Ver README > Nomenclatura y Smoke/Regression.
   projects: [
     {
       name: "apis",
       testDir: "./tests/apis",
+      testMatch: /.*\.spec\.ts$/,
       use: {
         baseURL: BASE_URL_API,
         extraHTTPHeaders: {
@@ -47,16 +49,7 @@ export default defineConfig({
     {
       name: "web",
       testDir: "./tests/web",
-      use: {
-        baseURL: BASE_URL_WEB,
-        browserName: "chromium",
-        ...devices["Desktop Chrome"],
-      },
-    },
-    {
-      name: "e2e",
-      testDir: "./tests/e2e",
-      dependencies: ["apis"],
+      testMatch: /.*\.spec\.ts$/,
       use: {
         baseURL: BASE_URL_WEB,
         browserName: "chromium",

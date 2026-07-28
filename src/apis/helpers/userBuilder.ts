@@ -3,8 +3,8 @@
  * válidos e inválidos de forma declarativa.
  */
 import { faker } from "@faker-js/faker";
-import type { AuthRequest } from "../../types/auth.js";
-import { generateEmail } from "../../shared/utils/dataGenerator.js";
+import type { AuthRequest } from "../types/auth.js";
+import { generateEmail } from "../../utils/dataGenerator.js";
 
 /**
  * Construye un usuario válido con email aleatorio y contraseña segura.
