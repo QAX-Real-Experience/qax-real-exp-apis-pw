@@ -1,33 +1,55 @@
-import { defineConfig } from "@playwright/test";
-import dotenv from "dotenv";
+import { defineConfig, devices } from "@playwright/test";
 
-// Carga las variables definidas en el archivo .env local.
-dotenv.config();
+// Carga directa de variables desde .env local.
+// No hay wrapper tipado: cada módulo lee `process.env` donde lo necesita.
+require("dotenv").config();
 
-// Variables obligatorias para ejecutar las pruebas contra Supabase.
-const requiredEnvVars = ["BASE_URL", "SUPABASE_API_KEY", "TEST_USER_PASSWORD"] as const;
+const BASE_URL_API = process.env.BASE_URL_API ?? "http://localhost";
+const BASE_URL_WEB = process.env.BASE_URL_WEB ?? "http://localhost";
 
-// Detiene la ejecucion si falta alguna variable requerida.
-for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    throw new Error(`Missing required environment variable: ${envVar}`);
-  }
-}
-
-// Variables ya validadas para usarlas dentro de la configuracion.
-const baseURL = process.env.BASE_URL as string;
-const supabaseApiKey = process.env.SUPABASE_API_KEY as string;
-
-// Configuracion general de Playwright para las pruebas de API.
 export default defineConfig({
-  testDir: "./tests",
-  reporter: [["list"], ["html", { open: "never" }]],
+  // Cada project define su propio testDir; el general sólo fija defaults.
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 1 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: [
+    ["list"],
+    ["html", { outputFolder: "playwright-report", open: "never" }],
+    ["junit", { outputFile: "test-results/junit.xml" }],
+  ],
+  globalTimeout: 60_000,
+  timeout: 30_000,
+  expect: { timeout: 5_000 },
   use: {
-    baseURL,
-    // Headers comunes que se enviaran en todas las requests.
-    extraHTTPHeaders: {
-      apikey: supabaseApiKey,
-      "Content-Type": "application/json",
-    },
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
   },
+
+  // Projects por tecnología. No hay project `e2e` separado: cada
+  // tecnología (apis, web) aloja sus flujos e2e dentro de su propia
+  // carpeta (tests/<tech>/e2e/{smoke,regression}). Para correrlos se
+  // filtra con --grep por tag (@smoke | @regression) o apuntando al
+  // subdirectorio. Ver README > Nomenclatura y Smoke/Regression.
+  projects: [
+    {
+      name: "apis",
+      testDir: "./tests/apis",
+      testMatch: /.*\.spec\.ts$/,
+      use: {
+        baseURL: BASE_URL_API,
+      },
+    },
+    {
+      name: "web",
+      testDir: "./tests/web",
+      testMatch: /.*\.spec\.ts$/,
+      use: {
+        baseURL: BASE_URL_WEB,
+        browserName: "chromium",
+        ...devices["Desktop Chrome"],
+      },
+    },
+  ],
 });
