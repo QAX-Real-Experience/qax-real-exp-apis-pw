@@ -10,7 +10,7 @@ Este espacio está destinado a que los aprendices apliquen, en un contexto real,
 
 Servir como **proyecto base genera-ejecutable** para todos los aprendices, cubriendo los niveles de automatización funcionales:
 
-- **APIs** — consumo y validación de servicios REST (Supabase Auth por defecto).
+- **APIs** — consumo y validación de servicios REST.
 - **Web** — interacción UI con Page Object Model (POM).
 
 Cada tecnología organiza sus pruebas en **`feature/`** (funcionales por feature) y **`e2e/`** (flujos integrados con enfoque `smoke` o `regression`). No existe un dominio `e2e` transversal: el e2e es propiedad de cada tecnología.
@@ -44,39 +44,106 @@ npm run typecheck
 npm run list
 ```
 
+### ¿Qué hacen `npm run typecheck` y `npm run list`?
+
+- **`npm run typecheck`** → ejecuta `tsc --noEmit`: compila TypeScript **en memoria sin generar archivos `.js`**, sólo para detectar errores de tipos. Sirve para garantizar que el código compila y que **no hay imports tipados rotos** **antes** de correr Playwright. Es rápido y no depende de `.env` ni de browsers.
+- **`npm run list`** → ejecuta `playwright test --list`: lee la config de Playwright y **enumera todos los specs/tests descubiertos sin ejecutarlos**. Útil para verificar que `testMatch`/la estructura de carpetas está bien y que Playwright detecta las pruebas esperadas (cantidad y títulos por project). Sí carga `.env` (dotenv se ejecuta al iniciar la config), así que cualquier error de config se manifiesta aquí.
+
+**Cuándo correrlos:**
+- Antes de commitear (siempre ambos).
+- Tras mover o renombrar archivos.
+- Tras cambiar `playwright.config.ts` (sobre todo `testDir`/`testMatch`/projects).
+- Tras agregar o quitar dependencias que afecten tipos.
+
 ## 🔑 Manejo de KEYS
 
 Las credenciales viven en un archivo `.env` **local** que **nunca** se commitea (ya ignorado por `.gitignore`). La carga se hace con `dotenv` directamente en `playwright.config.ts`; cada módulo lee `process.env` donde lo necesita.
 
-### Variables requeridas
+> ⚠️ **No se obtienen en un dashboard externo.** El origen de cada valor depende del destino de la prueba y se documenta abajo.
 
-| Variable | Para qué | Dónde obtenerla |
+### Variables
+
+| Variable | Para qué | Origen |
 |----------|----------|-----------------|
-| `SUPABASE_URL`            | URL del project Supabase | Dashboard > **Project Settings** > **API** > `Project URL` |
-| `SUPABASE_ANON_KEY`       | Header `apikey` en requests | Dashboard > **Project Settings** > **API** > `anon public` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Crear usuarios vía API en E2E | Dashboard > **Project Settings** > **API** > `service_role` (⚠️ secreto, no exponer en cliente) |
-| `BASE_URL_API`           | Base URL del proyecto APIs (normalmente = `SUPABASE_URL`) | — |
-| `BASE_URL_WEB`           | URL de la app Web (QAX-TERMINAL local: `http://localhost:5173`) | — |
-| `TEST_USER_PASSWORD`     | Contraseña usada para usuarios dinámicos creados por dataBuilder | Definida por vos |
-| `TEST_USER_EMAIL`        | (opcional) Usuario preexistente para smoke de login UI | — |
-| `API_TOKEN`              | (opcional) Token genérico si la app objetivo lo requiere | — |
+| `BASE_URL_API`       | Base URL del API objetivo (`baseURL` del project `apis` en Playwright) | **Swagger** del API: documentación de endpoints, ejemplos y datos de conexión. |
+| `BASE_URL_WEB`       | Base URL de la app Web objetivo (`baseURL` del project `web`) | Dominio de **staging** del producto (ej. `https://stg.qaxpert.com`). |
+| `API_TOKEN`          | Token de autenticación del API. Lo inyecta `apiHelper` como `Authorization: Bearer <token>` en todas las requests. | **Swagger** del API: sección de autenticación / endpoints de login. |
+| `TEST_USER_EMAIL`    | Email del usuario de prueba (login UI, smoke, casos que requieren usuario preexistente). | **Email temporal** descartable: **temp-mail.org** (o cualquier servicio de email temporal gratuito: guerrillamail, mailinator, ...). |
+| `TEST_USER_PASSWORD`  | Contraseña del usuario de prueba (o base para usuarios dinámicos generados por `userBuilder`). | La definís vos, consistente con el usuario registrado en el API/app. |
+
+### Origen y uso por destino
+
+#### APIs — Swagger
+
+Para pruebas **APIs** no se accede a ningún dashboard de backend externo. Toda la información necesaria está en el **Swagger** del API: base URL, endpoints, esquemas, ejemplos de request/response y **tokens** de autenticación. Copiá esos valores a tu `.env`.
+
+Uso dentro del proyecto:
+- `BASE_URL_API` → `baseURL` del project `apis` en `playwright.config.ts` y base para armar URLs en los services (`AuthService`, `SignupService`, ...).
+- `API_TOKEN` → lo inyecta `src/apis/helpers/apiHelper.ts` automáticamente como `Authorization: Bearer <token>` en **todas** las requests. Si el SUT usa otro esquema (apikey, basic, custom header), ajustá `apiHelper.defaultHeaders()` o pasá headers extra por llamada.
+- Parámetros de endpoint (paths, IDs) → van en cada service/builder; no en `.env`.
+
+#### Web — staging
+
+Para pruebas **Web** usá el dominio de **staging** del producto (`BASE_URL_WEB`, ej. `https://stg.qaxpert.com`). El ambiente de staging es el destino esperado de la automatización funcional; no se prueba contra producción.
+
+#### `TEST_USER_EMAIL` — email temporal
+
+Usá un **servicio de email temporal gratuito** para el email de prueba:
+- **temp-mail.org** (ejemplo recomendado) u otros: guerrillamail, mailinator, ...
+- ¿Por qué? **Evita spam** a cuentas reales, da **aislamiento** y permite **desechabilidad/reciclabilidad** entre.features sin contaminar inboxes personales.
+- Algunos flujos de prueba (registro/login con verificación por email) se benefician del correo desechable para leer códigos OTP/tokens sin gestión de inbox real.
+- El placeholder de ejemplo en `.env.example` es `tempmail+1@temp-mail.org` — **no es un valor real**, reemplazalo por el que tu servicio temporal generado.
 
 ### Por qué NO se commitean
 
-- Las keys (`SUPABASE_ANON_KEY`, y especialmente `service_role`) son secretos del proyecto. Filtrarlas permite a terceros actuar como tu proyecto.
-- `.gitignore` excluye `.env` y `.env.*` **excepto** `.env.example` (que tiene placeholders vacíos).
+- Las keys (`API_TOKEN`, credenciales de staging, contraseñas) son secretos del proyecto. Filtrarlas permite a terceros actuar contra tu ambiente.
+- `.gitignore` excluye `.env` y `.env.*` **excepto** `.env.example` (que tiene placeholders de guía, no valores reales).
 - Cualquier commit que incluya un `.env` real será rechazado en review.
 
 ### Cómo validar que las keys están cargadas
 
+Como **no** existe un módulo tipado `env.ts` que valide fail-fast, usá estas técnicas concretas:
+
+**1. `npm run list` (detección rápida de config)**
+Si dotenv carga y la config referencea variables, al ejecutar `npm run list` verás los títulos de specs cargados (sin errores de parsing de config). Si una variable impacta la config (`baseURL` vacío → `http://localhost`, headers faltantes) te dará cuenta visual al inspeccionar los detalles, aunque `--list` no ejecuta requests.
+
 ```bash
-# Debe listar specs sin errores de "undefined" en runtime
 npm run list
-# typecheck garantiza que los imports y tipos están OK
-npm run typecheck
 ```
 
-> ⚠️ A diferencia de versiones previas, este repo **no** valida fail-fast las variables en un módulo wrapper. Si falta una key, el fallo se manifestará en runtime dentro de la prueba que la usa (headers vacíos, baseURL `localhost`, etc.). Se optó por simplicidad: `dotenv` directo, `process.env` en cada Consumer.
+**2. Fallo natural en runtime**
+La forma **principal** de detectar una key faltante es dejar que corra el test afectado:
+- `BASE_URL_API` faltante → baseURL `http://localhost` → request a URL inválida/error de red → fallo claro.
+- `API_TOKEN` faltante → `Authorization` se omite → API responde **401/403** → fallo en el assert de status.
+- `BASE_URL_WEB` faltante → Playwright navega a `http://localhost` → la página no carga → assert de locator visible falla.
+El mensaje de Playwright te apunta al caso y al assert; de ahí al `.env` es directo.
+
+**3. Snippet de diagnóstico (opcional, no se crea en el repo)**
+Para inspeccionar valores cargados sin correr una suite completa, ejecutá un spec ad-hoc en tu rama local (NO lo commitees) con `--headed`/sin headless y leé consola:
+
+```ts
+// tests/apis/feature/diagnostics/env-check.spec.ts  (CREAR LOCAL, NO COMMITEAR)
+import { test } from "@playwright/test";
+test("diagnóstico de env", async () => {
+  console.log("BASE_URL_API=", process.env.BASE_URL_API);
+  console.log("API_TOKEN set?", Boolean(process.env.API_TOKEN));
+  console.log("TEST_USER_EMAIL=", process.env.TEST_USER_EMAIL);
+});
+```
+```bash
+npx playwright test env-check.spec.ts --project=apis --reporter=list
+```
+Se deja como snippet (no commiteado) para no ensuciar la suite base. Si lo creás **stágelo por separado** o **borralo** antes de commitear; está cubierto por `.gitignore` sólo si lo nombrás dentro de un path ignorado — seguridad: no lo agregues a `git add`.
+
+**4. `dotenv` en modo debug (temporal)**
+Editá `playwright.config.ts` temporalmente para activar el modo debug de dotenv y ver qué carga:
+
+```ts
+require("dotenv").config({ debug: true }); // TEMPORAL, no commitear
+```
+Volverá a imprimir en consola cada variable cargada con su origen (`.env` o entorno). **Revertí el cambio antes de commitear.**
+
+> 📌 Recordatorio: el proyecto **no** valida fail-fast por diseño (sin wrapper tipado). Es una decisión asumida por simplicidad. Dependé del camino de detección natural de runtime.
 
 ## 🗂 Estructura de carpetas
 
@@ -97,7 +164,7 @@ qax-real-exp-playwirght/
 │   │   └── dataGenerator.ts     # helpers de datos (generateEmail, ...)
 │   ├── apis/                    # dominio APIs
 │   │   ├── helpers/
-│   │   │   ├── apiHelper.ts     # wrapper HTTP con logging + apikey
+│   │   │   ├── apiHelper.ts     # wrapper HTTP con logging + auth Bearer
 │   │   │   └── userBuilder.ts   # data builders (buildValidUser, ...)
 │   │   ├── services/            # AuthService, SignupService
 │   │   ├── models/              # signupResponse, errorSignupResponse
@@ -271,6 +338,23 @@ npm run report            # HTML (abre navegador)
 - **Logger:** usar `Logger.step(name, fn)` para pasos lógicos (aparece en reporte HTML). Vive en `src/helpers/logger.ts` (reutilizable por cualquier tecnología).
 - **Tipos:** interfaces en `src/apis/types/` para APIs; `src/web/types/` cuando Web necesite los suyos. **Prohibido `any`** salvo en borders crudos (parsers).
 - **Variables de entorno:** leer `process.env.X` donde se necesite. No hay wrapper tipado.
+
+### `helpers/` vs `utils/` (¿qué va en cada una?)
+
+Ambas carpetas contienen funciones utilitarias reutilizables; la distinción es por **nivel de abstracción y dependencias del dominio/framework**:
+
+| | `helpers/` | `utils/` |
+|---|------------|----------|
+| **Qué** | Funciones que **envuelven lógica de negocio o de framework** con un propósito concreto. | Funciones **puras y genéricas**, agnósticas del dominio y del framework. |
+| **Nivel** | Alto nivel, orientadas a un caso de uso. | Bajo nivel, reutilizables en cualquier contexto. |
+| **Depende de** | Playwright, dominio, config del proyecto. | Nada externo (o sólo librerías puras como `faker`). |
+| **Ejemplos** | `logger.ts` (envuelve `test.step` de Playwright); `apiHelper.ts` (envuelve `APIRequestContext` con auth/headers); `uiHelper.ts` (envuelve `Page`); `userBuilder.ts` (construye `AuthRequest` con tipos del dominio). | `dataGenerator.ts` (generar strings/correos random); formateadores de fechas; parsers simples; slugify. |
+
+**Regla práctica:**
+- Si la función **importa algo de Playwright o conoce un tipo del dominio** → `helpers/`.
+- Si la función **podrías copiarla a otro proyecto que use otro framework** y anda igual → `utils/`.
+
+> Los helpers/utils **pueden ser usados por cualquier tecnología** (apis, web o cualquier e2e). Por eso viven en `src/helpers/` y `src/utils/` (raíz), no anidados en un dominio. Los helpers específicos de un dominio (apiHelper, uiHelper, userBuilder) sí viven bajo ese dominio (`src/apis/helpers/`, `src/web/helpers/`), porque su lógica está atada a esa tecnología.
 
 ## 🌿 Flujo de trabajo git del aprendiz
 
