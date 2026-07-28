@@ -4,9 +4,8 @@ import { defineConfig, devices } from "@playwright/test";
 // No hay wrapper tipado: cada módulo lee `process.env` donde lo necesita.
 require("dotenv").config();
 
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? "";
 const BASE_URL_API = process.env.BASE_URL_API ?? "http://localhost";
-const BASE_URL_WEB = process.env.BASE_URL_WEB ?? "http://localhost:5173";
+const BASE_URL_WEB = process.env.BASE_URL_WEB ?? "http://localhost";
 
 export default defineConfig({
   // Cada project define su propio testDir; el general sólo fija defaults.
@@ -40,10 +39,6 @@ export default defineConfig({
       testMatch: /.*\.spec\.ts$/,
       use: {
         baseURL: BASE_URL_API,
-        extraHTTPHeaders: {
-          apikey: SUPABASE_ANON_KEY,
-          "Content-Type": "application/json",
-        },
       },
     },
     {
