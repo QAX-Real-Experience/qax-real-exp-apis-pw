@@ -1,18 +1,24 @@
 {
-  "name": "qax-real-exp-apis-pw",
-  "version": "1.0.0",
-  "description": "Repositorio de automatización de APIs con Playwright para QAX Real Experience.",
+  "name": "qax-real-exp-playwirght",
+  "version": "2.0.0",
+  "description": "Repositorio base de automatización funcional APIs + Web + E2E con Playwright y TypeScript para QAX Real Experience.",
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
+    "test:apis": "playwright test --project=apis",
+    "test:web": "playwright test --project=web",
     "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug",
+    "test:debug": "PWDEBUG=1 playwright test",
+    "test:grep": "playwright test --grep",
     "report": "playwright show-report",
-    "test:auth": "playwright test tests/auth.spec.ts"
+    "typecheck": "tsc --noEmit",
+    "list": "playwright test --list"
   },
   "keywords": [
     "playwright",
     "api-testing",
+    "web-testing",
+    "e2e",
     "test-automation",
     "qa-automation",
     "qax-real-experience",
@@ -29,13 +35,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/QAX-Real-Experience/qax-real-exp-apis-pw.git"
+    "url": "git+https://github.com/QAX-Real-Experience/qax-real-exp-playwirght.git"
   },
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/QAX-Real-Experience/qax-real-exp-apis-pw/issues"
+    "url": "https://github.com/QAX-Real-Experience/qax-real-exp-playwirght/issues"
   },
-  "homepage": "https://github.com/QAX-Real-Experience/qax-real-exp-apis-pw#readme",
+  "homepage": "https://github.com/QAX-Real-Experience/qax-real-exp-playwirght#readme",
   "dependencies": {
     "@faker-js/faker": "^10.4.0"
   }
