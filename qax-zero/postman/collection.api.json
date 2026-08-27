@@ -1,0 +1,633 @@
+{
+  "info": {
+    "_postman_id": "7f4c7fd2-2a21-4ce9-bfc3-qax-zero-api",
+    "name": "qax-zero - APIs Aprendiz Cero",
+    "description": "Coleccion manual para probar las APIs de registro, login y usuario autenticado.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "item": [
+    {
+      "name": "US1 - Registro de aprendiz cero",
+      "item": [
+        {
+          "name": "Registro exitoso",
+          "request": {
+            "description": "Editar la variable email antes de ejecutar si se necesita un usuario nuevo.",
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabase_anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"full_name\": \"{{full_name}}\",\n  \"captcha_token\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/functions/v1/register-lead",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "functions",
+                "v1",
+                "register-lead"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registro sin email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabase_anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"{{password}}\",\n  \"full_name\": \"{{full_name}}\",\n  \"captcha_token\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/functions/v1/register-lead",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "functions",
+                "v1",
+                "register-lead"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registro con password menor a 8 caracteres",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabase_anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{short_password}}\",\n  \"full_name\": \"{{full_name}}\",\n  \"captcha_token\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/functions/v1/register-lead",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "functions",
+                "v1",
+                "register-lead"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registro con email mal formado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabase_anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{invalid_email}}\",\n  \"password\": \"{{password}}\",\n  \"full_name\": \"{{full_name}}\",\n  \"captcha_token\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/functions/v1/register-lead",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "functions",
+                "v1",
+                "register-lead"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registro con nombre de exactamente 100 caracteres",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabase_anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"full_name\": \"{{full_name_100}}\",\n  \"captcha_token\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/functions/v1/register-lead",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "functions",
+                "v1",
+                "register-lead"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registro con nombre mayor a 100 caracteres",
+          "request": {
+            "description": "Bug conocido: actualmente el backend acepta este caso, aunque la HU indica que debe rechazarlo.",
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabase_anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"full_name\": \"{{full_name_101}}\",\n  \"captcha_token\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/functions/v1/register-lead",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "functions",
+                "v1",
+                "register-lead"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registro con email duplicado",
+          "request": {
+            "description": "Para probarlo manualmente, ejecutar dos veces este mismo request usando el mismo duplicate_email.",
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabase_anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{duplicate_email}}\",\n  \"password\": \"{{password}}\",\n  \"full_name\": \"{{full_name}}\",\n  \"captcha_token\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/functions/v1/register-lead",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "functions",
+                "v1",
+                "register-lead"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "US2 - Login de aprendiz cero",
+      "item": [
+        {
+          "name": "Login exitoso",
+          "request": {
+            "description": "Usar email y password de un aprendiz ya registrado. Copiar el access_token de la respuesta para usarlo en Validar usuario autenticado.",
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabase_anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=UTF-8"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "x-client-info",
+                "value": "supabase-js/2.112.3; runtime=web"
+              },
+              {
+                "key": "x-supabase-api-version",
+                "value": "2024-01-01"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"gotrue_meta_security\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/v1/token?grant_type=password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "v1",
+                "token"
+              ],
+              "query": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Validar usuario autenticado",
+          "request": {
+            "description": "Pegar en access_token el token obtenido en Login exitoso.",
+            "method": "GET",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/v1/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "v1",
+                "user"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login con password incorrecta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabase_anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=UTF-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{wrong_password}}\",\n  \"gotrue_meta_security\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/v1/token?grant_type=password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "v1",
+                "token"
+              ],
+              "query": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login con usuario inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabase_anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=UTF-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{missing_user_email}}\",\n  \"password\": \"{{password}}\",\n  \"gotrue_meta_security\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/v1/token?grant_type=password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "v1",
+                "token"
+              ],
+              "query": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login sin email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabase_anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=UTF-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"{{password}}\",\n  \"gotrue_meta_security\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/v1/token?grant_type=password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "v1",
+                "token"
+              ],
+              "query": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login sin password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabase_anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=UTF-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"gotrue_meta_security\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/v1/token?grant_type=password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "v1",
+                "token"
+              ],
+              "query": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login con email mal formado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{supabase_anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{supabase_anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json;charset=UTF-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{invalid_email}}\",\n  \"password\": \"{{password}}\",\n  \"gotrue_meta_security\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/v1/token?grant_type=password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "v1",
+                "token"
+              ],
+              "query": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://zjlscomkvdbspkuudled.supabase.co",
+      "type": "string"
+    },
+    {
+      "key": "supabase_anon_key",
+      "value": "",
+      "type": "secret"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "secret"
+    },
+    {
+      "key": "email",
+      "value": "aprendiz.manual@test.test",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "Password123!",
+      "type": "string"
+    },
+    {
+      "key": "full_name",
+      "value": "Aprendiz QA",
+      "type": "string"
+    },
+    {
+      "key": "short_password",
+      "value": "1234567",
+      "type": "string"
+    },
+    {
+      "key": "wrong_password",
+      "value": "PasswordIncorrecta123!",
+      "type": "string"
+    },
+    {
+      "key": "invalid_email",
+      "value": "email-sin-formato",
+      "type": "string"
+    },
+    {
+      "key": "missing_user_email",
+      "value": "no.existe@test.test",
+      "type": "string"
+    },
+    {
+      "key": "duplicate_email",
+      "value": "aprendiz.duplicado@test.test",
+      "type": "string"
+    },
+    {
+      "key": "full_name_100",
+      "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "type": "string"
+    },
+    {
+      "key": "full_name_101",
+      "value": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "type": "string"
+    }
+  ]
+}
